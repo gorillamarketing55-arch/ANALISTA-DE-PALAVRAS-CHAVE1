@@ -1,0 +1,811 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard Selecionador de Palavras-Chave - Google Ads</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Font Awesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Plus Jakarta Sans', 'sans-serif'],
+                    },
+                    colors: {
+                        google: {
+                            blue: '#1a73e8',
+                            green: '#34a853',
+                            yellow: '#fbbc04',
+                            red: '#ea4335',
+                            dark: '#202124',
+                            light: '#f8f9fa'
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 8px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 8px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8;
+        }
+    </style>
+</head>
+<body class="bg-slate-100 text-slate-800 font-sans min-h-screen flex flex-col">
+
+    <!-- TOP HEADER -->
+    <header class="bg-white border-b border-slate-200 sticky top-0 z-50 shadow-sm">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-blue-600 to-indigo-600 flex items-center justify-center text-white font-bold text-xl shadow-md shadow-blue-500/20">
+                    <i class="fa-solid fa-bolt-lightning"></i>
+                </div>
+                <div>
+                    <h1 class="text-lg font-bold text-slate-900 leading-tight">KeyMatch Fácil <span class="text-xs bg-emerald-100 text-emerald-800 px-2 py-0.5 rounded-full font-bold ml-1"><i class="fa-solid fa-wand-magic-sparkles"></i> Analisador Automático</span></h1>
+                    <p class="text-xs text-slate-500">Digite a palavra e descubra na hora o que ela faz e qual resultado vai trazer!</p>
+                </div>
+            </div>
+
+            <!-- TABS NAVIGATION -->
+            <nav class="hidden md:flex space-x-1 bg-slate-100 p-1 rounded-xl border border-slate-200/60">
+                <button onclick="switchTab('analyzer')" id="tab-analyzer" class="px-4 py-2 text-xs font-semibold rounded-lg transition-all text-blue-700 bg-white shadow-sm">
+                    <i class="fa-solid fa-magnifying-glass-chart mr-1.5"></i>Analisar Palavra
+                </button>
+                <button onclick="switchTab('simulator')" id="tab-simulator" class="px-4 py-2 text-xs font-semibold rounded-lg transition-all text-slate-600 hover:text-slate-900">
+                    <i class="fa-solid fa-eye mr-1.5"></i>Ver Resultados Reais
+                </button>
+                <button onclick="switchTab('builder')" id="tab-builder" class="px-4 py-2 text-xs font-semibold rounded-lg transition-all text-slate-600 hover:text-slate-900">
+                    <i class="fa-solid fa-copy mr-1.5"></i>Gerador para Google Ads
+                </button>
+                <button onclick="switchTab('negatives')" id="tab-negatives" class="px-4 py-2 text-xs font-semibold rounded-lg transition-all text-slate-600 hover:text-slate-900">
+                    <i class="fa-solid fa-shield-halved mr-1.5"></i>Bloqueador de Desperdício
+                </button>
+            </nav>
+        </div>
+    </header>
+
+    <!-- MAIN CONTAINER -->
+    <main class="flex-grow max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6">
+
+        <!-- MOBILE NAVIGATION -->
+        <div class="flex md:hidden overflow-x-auto gap-2 pb-3 mb-4 custom-scrollbar">
+            <button onclick="switchTab('analyzer')" class="m-tab-btn flex-shrink-0 px-3 py-2 text-xs font-bold rounded-lg bg-blue-600 text-white" data-target="analyzer">
+                Analisar
+            </button>
+            <button onclick="switchTab('simulator')" class="m-tab-btn flex-shrink-0 px-3 py-2 text-xs font-bold rounded-lg bg-white text-slate-700 border border-slate-200" data-target="simulator">
+                Resultados Reais
+            </button>
+            <button onclick="switchTab('builder')" class="m-tab-btn flex-shrink-0 px-3 py-2 text-xs font-bold rounded-lg bg-white text-slate-700 border border-slate-200" data-target="builder">
+                Gerador
+            </button>
+            <button onclick="switchTab('negatives')" class="m-tab-btn flex-shrink-0 px-3 py-2 text-xs font-bold rounded-lg bg-white text-slate-700 border border-slate-200" data-target="negatives">
+                Bloqueador
+            </button>
+        </div>
+
+        <!-- ================= TAB 1: ANALISTA INTERATIVO DE PALAVRA ================= -->
+        <div id="view-analyzer" class="tab-content space-y-6">
+            
+            <!-- INPUT HERO CARD -->
+            <div class="bg-white rounded-2xl p-6 border-2 border-blue-500/30 shadow-lg relative overflow-hidden">
+                
+                <label for="kwInput" class="block text-sm font-extrabold uppercase tracking-wide text-slate-700 mb-2">
+                    <i class="fa-solid fa-i-cursor text-blue-600 mr-1.5"></i> Digite aqui a palavra-chave que você quer colocar na sua campanha:
+                </label>
+                
+                <div class="flex flex-col sm:flex-row gap-3">
+                    <div class="relative flex-grow">
+                        <input type="text" id="kwInput" value="ingles" 
+                            oninput="analyzeKeyword()"
+                            onkeyup="analyzeKeyword()"
+                            placeholder="Digite a palavra que deseja testar (ex: ingles, curso de ingles, sapato masculino)..." 
+                            class="w-full pl-11 pr-10 py-4 text-slate-900 text-lg font-bold bg-slate-50 border-2 border-blue-200 rounded-xl focus:bg-white focus:ring-4 focus:ring-blue-500/20 focus:border-blue-600 transition-all shadow-inner">
+                        <div class="absolute left-4 top-1/2 -translate-y-1/2 text-blue-600 font-bold text-xl">
+                            <i class="fa-solid fa-magnifying-glass"></i>
+                        </div>
+                        <button onclick="clearAndFocus()" class="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 p-1 font-bold text-sm bg-slate-200 rounded-full w-6 h-6 flex items-center justify-center">
+                            ✕
+                        </button>
+                    </div>
+                    <div class="flex gap-2">
+                        <button onclick="analyzeKeyword()" class="px-5 py-3 text-sm bg-blue-600 hover:bg-blue-700 text-white rounded-xl transition font-bold shadow-md flex items-center gap-2">
+                            <i class="fa-solid fa-bolt"></i> Analisar
+                        </button>
+                    </div>
+                </div>
+
+                <!-- PRESET QUICK TESTS -->
+                <div class="mt-3 flex flex-wrap items-center gap-2 text-xs text-slate-500">
+                    <span class="font-bold text-slate-700">Testar formatos da sua palavra:</span>
+                    <button onclick="formatCurrentInput('broad')" class="px-2.5 py-1 bg-slate-100 hover:bg-slate-200 text-slate-800 rounded-lg font-mono font-bold border border-slate-300">
+                        Sua palavra (Ampla)
+                    </button>
+                    <button onclick="formatCurrentInput('phrase')" class="px-2.5 py-1 bg-purple-100 hover:bg-purple-200 text-purple-900 rounded-lg font-mono font-bold border border-purple-300">
+                        "Sua palavra" (Frase)
+                    </button>
+                    <button onclick="formatCurrentInput('exact')" class="px-2.5 py-1 bg-emerald-100 hover:bg-emerald-200 text-emerald-900 rounded-lg font-mono font-bold border border-emerald-300">
+                        [Sua palavra] (Exata)
+                    </button>
+                </div>
+
+                <!-- AUTO-DIAGNOSTIC BANNER -->
+                <div class="mt-5 p-4 rounded-xl bg-gradient-to-r from-slate-900 to-slate-800 text-white flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+                    <div class="flex items-center gap-3">
+                        <div class="w-12 h-12 rounded-xl bg-blue-600 text-white flex items-center justify-center font-bold text-2xl flex-shrink-0" id="badgeIcon">
+                            <i class="fa-solid fa-globe"></i>
+                        </div>
+                        <div>
+                            <div class="text-xs text-blue-300 font-bold uppercase tracking-wider">Diagnóstico para: <span id="targetKwDisplay" class="underline text-white font-black">INGLES</span></div>
+                            <div id="typeBadgeText" class="text-lg font-black text-white">Correspondência Ampla (Broad)</div>
+                        </div>
+                    </div>
+                    <div id="formatTip" class="text-xs bg-slate-800/80 border border-slate-700 px-3 py-2 rounded-lg text-slate-300 max-w-md">
+                        Sem aspas ou colchetes nas pontas: O Google vai dar liberdade total para o robô buscar sinônimos.
+                    </div>
+                </div>
+            </div>
+
+            <!-- KEY RESULTS EXPECTED SUMMARY -->
+            <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
+                <h2 class="text-base font-bold text-slate-900 mb-4 flex items-center gap-2">
+                    <i class="fa-solid fa-chart-line text-blue-600"></i>
+                    QUAL RESULTADO ESSA PALAVRA VAI TE DAR NO GOOGLE:
+                </h2>
+
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    
+                    <!-- RESULT 1: CONVERSÃO -->
+                    <div class="p-4 rounded-xl border-2 border-slate-100 bg-slate-50 flex flex-col justify-between" id="cardConv">
+                        <div>
+                            <div class="text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">Chance de Fazer Venda</div>
+                            <div class="text-xl font-black text-slate-900" id="mConversionText">Média / Baixa</div>
+                            <p class="text-xs text-slate-600 mt-2 leading-relaxed" id="mConversionDesc">Atrai pessoas pesquisando ideias. Não estão prontas para comprar imediatamente.</p>
+                        </div>
+                        <div class="mt-4 pt-2 border-t border-slate-200 text-xs font-bold text-slate-700" id="mConversionBadge">
+                            <i class="fa-solid fa-bullseye text-amber-500 mr-1"></i> Funil: Topo (Pesquisa)
+                        </div>
+                    </div>
+
+                    <!-- RESULT 2: RISCO FINANCEIRO -->
+                    <div class="p-4 rounded-xl border-2 border-slate-100 bg-slate-50 flex flex-col justify-between" id="cardRisk">
+                        <div>
+                            <div class="text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">Risco de Gastar Sem Vender</div>
+                            <div class="text-xl font-black text-slate-900" id="mRiskText">Alto Risco</div>
+                            <p class="text-xs text-slate-600 mt-2 leading-relaxed" id="mRiskDesc">Pode atrair buscas estranhas e curiosos. Exige colocar palavras negativas.</p>
+                        </div>
+                        <div class="mt-4 pt-2 border-t border-slate-200 text-xs font-bold text-slate-700" id="mRiskBadge">
+                            <i class="fa-solid fa-triangle-exclamation text-rose-500 mr-1"></i> Ação: Negativar Sempre
+                        </div>
+                    </div>
+
+                    <!-- RESULT 3: CONTROLE -->
+                    <div class="p-4 rounded-xl border-2 border-slate-100 bg-slate-50 flex flex-col justify-between" id="cardCtrl">
+                        <div>
+                            <div class="text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">Seu Controle Sobre a Palavra</div>
+                            <div class="text-xl font-black text-slate-900" id="mControlText">Baixo Controle</div>
+                            <p class="text-xs text-slate-600 mt-2 leading-relaxed" id="mControlDesc">O robô do Google escolhe por conta própria quem vai ver seu anúncio.</p>
+                        </div>
+                        <div class="mt-4 pt-2 border-t border-slate-200 text-xs font-bold text-slate-700" id="mControlBadge">
+                            <i class="fa-solid fa-sliders text-blue-500 mr-1"></i> Controle: Algoritmo Decide
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+
+            <!-- DETAILED EXAMPLE MATCHES AND ADVICE -->
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                
+                <!-- LEFT: SEARCH EXAMPLES -->
+                <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm space-y-4">
+                    <h3 class="text-base font-bold text-slate-900 flex items-center gap-2">
+                        <i class="fa-solid fa-list-check text-blue-600"></i>
+                        Exemplos de pesquisas em que seu anúncio vai aparecer:
+                    </h3>
+
+                    <div id="examplesContainer" class="space-y-3">
+                        <!-- Injected by JS -->
+                    </div>
+                </div>
+
+                <!-- RIGHT: HOW TO FORMAT THIS KEYWORD FOR GOOGLE -->
+                <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm space-y-4">
+                    <h3 class="text-base font-bold text-slate-900 flex items-center gap-2">
+                        <i class="fa-solid fa-wand-magic-sparkles text-purple-600"></i>
+                        Copie a sua palavra pronta na correspondência ideal:
+                    </h3>
+
+                    <div class="space-y-3">
+                        
+                        <!-- OPTION 1: BROAD -->
+                        <div class="p-3 rounded-xl bg-slate-50 border border-slate-200 flex items-center justify-between gap-2">
+                            <div>
+                                <span class="text-[10px] font-extrabold uppercase bg-blue-100 text-blue-800 px-2 py-0.5 rounded">Para Aumentar Alcance (Ampla)</span>
+                                <div class="font-mono font-bold text-slate-800 text-sm mt-1" id="copyBroadKw">curso de inglês</div>
+                            </div>
+                            <button onclick="copySingle('copyBroadKw')" class="px-3 py-1.5 text-xs bg-white hover:bg-slate-100 text-slate-700 font-bold border border-slate-300 rounded-lg transition flex items-center gap-1">
+                                <i class="fa-solid fa-copy"></i> Copiar
+                            </button>
+                        </div>
+
+                        <!-- OPTION 2: PHRASE -->
+                        <div class="p-3 rounded-xl bg-purple-50 border border-purple-200 flex items-center justify-between gap-2">
+                            <div>
+                                <span class="text-[10px] font-extrabold uppercase bg-purple-100 text-purple-800 px-2 py-0.5 rounded">A Mais Recomendada ("Frase")</span>
+                                <div class="font-mono font-bold text-purple-900 text-sm mt-1" id="copyPhraseKw">"curso de inglês"</div>
+                            </div>
+                            <button onclick="copySingle('copyPhraseKw')" class="px-3 py-1.5 text-xs bg-purple-600 hover:bg-purple-700 text-white font-bold rounded-lg transition flex items-center gap-1 shadow-sm">
+                                <i class="fa-solid fa-copy"></i> Copiar
+                            </button>
+                        </div>
+
+                        <!-- OPTION 3: EXACT -->
+                        <div class="p-3 rounded-xl bg-emerald-50 border border-emerald-200 flex items-center justify-between gap-2">
+                            <div>
+                                <span class="text-[10px] font-extrabold uppercase bg-emerald-100 text-emerald-800 px-2 py-0.5 rounded">Para Vendas Diretas Sem Erro ([Exata])</span>
+                                <div class="font-mono font-bold text-emerald-900 text-sm mt-1" id="copyExactKw">[curso de inglês]</div>
+                            </div>
+                            <button onclick="copySingle('copyExactKw')" class="px-3 py-1.5 text-xs bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-lg transition flex items-center gap-1 shadow-sm">
+                                <i class="fa-solid fa-copy"></i> Copiar
+                            </button>
+                        </div>
+
+                    </div>
+                </div>
+
+            </div>
+
+        </div>
+
+        <!-- ================= TAB 2: SIMULADOR DE TRÁFEGO E COMPARAÇÃO ================= -->
+        <div id="view-simulator" class="tab-content hidden space-y-6">
+            <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
+                <div class="max-w-3xl">
+                    <h2 class="text-lg font-bold text-slate-900 mb-1">Simulador de Correspondência Lado a Lado</h2>
+                    <p class="text-sm text-slate-500 mb-4">Veja como uma mesma palavra-chave base se comporta quando ativada nas 3 correspondências diferentes segundo as regras da aula.</p>
+                </div>
+
+                <div class="flex flex-col sm:flex-row gap-3">
+                    <input type="text" id="simBaseKw" value="tênis esportivo" placeholder="Digite o termo base (Ex: curso de ingles)" 
+                        class="flex-grow px-4 py-3 bg-slate-50 border border-slate-300 rounded-xl font-medium text-slate-800 focus:bg-white focus:ring-2 focus:ring-blue-500">
+                    <button onclick="runSimulation()" class="px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-xl transition shadow-md shadow-blue-500/20">
+                        Simular Comportamentos
+                    </button>
+                </div>
+            </div>
+
+            <!-- COMPARISON GRID -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                
+                <!-- BROAD COLUMN -->
+                <div class="bg-white rounded-2xl border border-blue-200 p-5 shadow-sm">
+                    <div class="flex items-center justify-between pb-3 mb-3 border-b border-slate-100">
+                        <div>
+                            <span class="text-[10px] font-extrabold uppercase bg-blue-100 text-blue-800 px-2 py-0.5 rounded">Sintaxe: Nenhuma</span>
+                            <h3 class="font-bold text-slate-900 text-base mt-1" id="simTitleBroad">tênis esportivo</h3>
+                        </div>
+                        <span class="text-xs text-blue-600 font-bold">Ampla</span>
+                    </div>
+                    <p class="text-xs text-slate-500 mb-3">Busca sinônimos, intenções amplas e variações distantes.</p>
+                    <div class="space-y-2 text-xs">
+                        <div class="font-bold text-slate-700 text-[11px] uppercase tracking-wider">Buscas que ativam:</div>
+                        <div class="p-2 rounded bg-emerald-50 text-emerald-800 border border-emerald-200 flex items-center gap-1.5">
+                            <i class="fa-solid fa-circle-check text-emerald-600"></i> calçados esportivos
+                        </div>
+                        <div class="p-2 rounded bg-emerald-50 text-emerald-800 border border-emerald-200 flex items-center gap-1.5">
+                            <i class="fa-solid fa-circle-check text-emerald-600"></i> comprar tênis em promoção
+                        </div>
+                        <div class="p-2 rounded bg-amber-50 text-amber-800 border border-amber-200 flex items-center gap-1.5">
+                            <i class="fa-solid fa-triangle-exclamation text-amber-600"></i> raquete de tênis (Cuidado)
+                        </div>
+                        <div class="p-2 rounded bg-rose-50 text-rose-800 border border-rose-200 flex items-center gap-1.5">
+                            <i class="fa-solid fa-circle-xmark text-rose-600"></i> tenis para treino de academia
+                        </div>
+                    </div>
+                </div>
+
+                <!-- PHRASE COLUMN -->
+                <div class="bg-white rounded-2xl border border-purple-200 p-5 shadow-sm">
+                    <div class="flex items-center justify-between pb-3 mb-3 border-b border-slate-100">
+                        <div>
+                            <span class="text-[10px] font-extrabold uppercase bg-purple-100 text-purple-800 px-2 py-0.5 rounded">Sintaxe: "Aspas"</span>
+                            <h3 class="font-bold text-slate-900 text-base mt-1" id="simTitlePhrase">"tênis esportivo"</h3>
+                        </div>
+                        <span class="text-xs text-purple-600 font-bold">Frase</span>
+                    </div>
+                    <p class="text-xs text-slate-500 mb-3">Mantém o sentido principal da frase, aceitando termos antes/depois.</p>
+                    <div class="space-y-2 text-xs">
+                        <div class="font-bold text-slate-700 text-[11px] uppercase tracking-wider">Buscas que ativam:</div>
+                        <div class="p-2 rounded bg-emerald-50 text-emerald-800 border border-emerald-200 flex items-center gap-1.5">
+                            <i class="fa-solid fa-circle-check text-emerald-600"></i> comprar tênis esportivo em promoção
+                        </div>
+                        <div class="p-2 rounded bg-emerald-50 text-emerald-800 border border-emerald-200 flex items-center gap-1.5">
+                            <i class="fa-solid fa-circle-check text-emerald-600"></i> tênis esportivo vermelho
+                        </div>
+                        <div class="p-2 rounded bg-rose-50 text-rose-800 border border-rose-200 flex items-center gap-1.5">
+                            <i class="fa-solid fa-circle-xmark text-rose-600"></i> raquete de tênis (Filtrado!)
+                        </div>
+                        <div class="p-2 rounded bg-rose-50 text-rose-800 border border-rose-200 flex items-center gap-1.5">
+                            <i class="fa-solid fa-circle-xmark text-rose-600"></i> tênis para corrida
+                        </div>
+                    </div>
+                </div>
+
+                <!-- EXACT COLUMN -->
+                <div class="bg-white rounded-2xl border border-emerald-200 p-5 shadow-sm">
+                    <div class="flex items-center justify-between pb-3 mb-3 border-b border-slate-100">
+                        <div>
+                            <span class="text-[10px] font-extrabold uppercase bg-emerald-100 text-emerald-800 px-2 py-0.5 rounded">Sintaxe: [Colchetes]</span>
+                            <h3 class="font-bold text-slate-900 text-base mt-1" id="simTitleExact">[tênis esportivo]</h3>
+                        </div>
+                        <span class="text-xs text-emerald-600 font-bold">Exata</span>
+                    </div>
+                    <p class="text-xs text-slate-500 mb-3">Apenas a palavra ou variações exatas com mesmo significado sem acréscimos.</p>
+                    <div class="space-y-2 text-xs">
+                        <div class="font-bold text-slate-700 text-[11px] uppercase tracking-wider">Buscas que ativam:</div>
+                        <div class="p-2 rounded bg-emerald-50 text-emerald-800 border border-emerald-200 flex items-center gap-1.5">
+                            <i class="fa-solid fa-circle-check text-emerald-600"></i> tênis esportivo
+                        </div>
+                        <div class="p-2 rounded bg-emerald-50 text-emerald-800 border border-emerald-200 flex items-center gap-1.5">
+                            <i class="fa-solid fa-circle-check text-emerald-600"></i> tenis esportivos (Plural/Acento)
+                        </div>
+                        <div class="p-2 rounded bg-rose-50 text-rose-800 border border-rose-200 flex items-center gap-1.5">
+                            <i class="fa-solid fa-circle-xmark text-rose-600"></i> comprar tênis esportivo (Bloqueado)
+                        </div>
+                        <div class="p-2 rounded bg-rose-50 text-rose-800 border border-rose-200 flex items-center gap-1.5">
+                            <i class="fa-solid fa-circle-xmark text-rose-600"></i> tênis masculino
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+        <!-- ================= TAB 3: FORMATADOR EM MASSA PARA GOOGLE ADS ================= -->
+        <div id="view-builder" class="tab-content hidden space-y-6">
+            <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
+                <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-4">
+                    <div>
+                        <h2 class="text-lg font-bold text-slate-900">Formatador e Gerador de Lista para o Google Ads</h2>
+                        <p class="text-xs text-slate-500">Cole suas palavras do planejador abaixo e converta para a sintaxe certa com um clique.</p>
+                    </div>
+                    <div class="flex gap-2">
+                        <button onclick="formatBulk('broad')" class="px-3 py-2 text-xs font-bold bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg border border-slate-300">
+                            Deixar Ampla
+                        </button>
+                        <button onclick="formatBulk('phrase')" class="px-3 py-2 text-xs font-bold bg-purple-50 hover:bg-purple-100 text-purple-700 rounded-lg border border-purple-300">
+                            Adicionar "Aspas"
+                        </button>
+                        <button onclick="formatBulk('exact')" class="px-3 py-2 text-xs font-bold bg-emerald-50 hover:bg-emerald-100 text-emerald-700 rounded-lg border border-emerald-300">
+                            Adicionar [Colchetes]
+                        </button>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-xs font-bold uppercase text-slate-500 mb-1">Cole aqui suas palavras (Uma por linha):</label>
+                        <textarea id="bulkInput" rows="10" placeholder="curso de ingles&#10;comprar tenis esportivo&#10;plano de dieta carboidrato" 
+                            class="w-full p-3 text-sm font-mono bg-slate-50 border border-slate-300 rounded-xl focus:bg-white focus:ring-2 focus:ring-blue-500"></textarea>
+                    </div>
+                    <div>
+                        <div class="flex justify-between items-center mb-1">
+                            <label class="block text-xs font-bold uppercase text-slate-500">Pronto para Copiar no Google Ads:</label>
+                            <button onclick="copyFormattedList()" class="text-xs text-blue-600 font-bold hover:underline flex items-center gap-1">
+                                <i class="fa-solid fa-copy"></i> Copiar Tudo
+                            </button>
+                        </div>
+                        <textarea id="bulkOutput" readonly rows="10" 
+                            class="w-full p-3 text-sm font-mono bg-slate-900 text-emerald-400 rounded-xl border border-slate-800"></textarea>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ================= TAB 4: ESCUDO DE PALAVRAS NEGATIVAS ================= -->
+        <div id="view-negatives" class="tab-content hidden space-y-6">
+            <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
+                <div class="max-w-3xl">
+                    <h2 class="text-lg font-bold text-slate-900 mb-1">Lista Mestra de Palavras-Chave Negativas Padrão</h2>
+                    <p class="text-sm text-slate-500 mb-4">Como ensinado na aula: negativar é a melhor forma de economizar dinheiro e evitar cliques desqualificados que não geram vendas.</p>
+                </div>
+
+                <!-- CATEGORIES OF NEGATIVES -->
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-6">
+                    
+                    <!-- CAT 1: GRATIS E BARATO -->
+                    <div class="p-4 rounded-xl bg-rose-50 border border-rose-200">
+                        <h4 class="font-bold text-rose-900 text-sm mb-2 flex items-center justify-between">
+                            <span><i class="fa-solid fa-hand-holding-dollar mr-1.5"></i> Sem Intenção de Compra</span>
+                            <input type="checkbox" checked class="neg-check" data-cat="free" onchange="generateNegativeList()">
+                        </h4>
+                        <p class="text-xs text-rose-700/80 mb-2">Evita curioso buscando conteúdo gratuito.</p>
+                        <div class="text-xs font-mono text-rose-800 bg-white p-2 rounded border border-rose-200">
+                            gratis, gratuito, de graça, 0 800, pirata, pdf, download, torrent
+                        </div>
+                    </div>
+
+                    <!-- CAT 2: EMPREGO E TRABALHO -->
+                    <div class="p-4 rounded-xl bg-amber-50 border border-amber-200">
+                        <h4 class="font-bold text-amber-900 text-sm mb-2 flex items-center justify-between">
+                            <span><i class="fa-solid fa-briefcase mr-1.5"></i> Emprego / Vagas (Professores)</span>
+                            <input type="checkbox" checked class="neg-check" data-cat="jobs" onchange="generateNegativeList()">
+                        </h4>
+                        <p class="text-xs text-amber-700/80 mb-2">Evita candidatos a vagas de emprego.</p>
+                        <div class="text-xs font-mono text-amber-800 bg-white p-2 rounded border border-amber-200">
+                            trabalhar, vagas, curriculo, estagio, salario, contratação, professor, emprego
+                        </div>
+                    </div>
+
+                    <!-- CAT 3: INFORMAÇÃO / ESTUDO -->
+                    <div class="p-4 rounded-xl bg-blue-50 border border-blue-200">
+                        <h4 class="font-bold text-blue-900 text-sm mb-2 flex items-center justify-between">
+                            <span><i class="fa-solid fa-graduation-cap mr-1.5"></i> Curiosos / Trabalhos</span>
+                            <input type="checkbox" checked class="neg-check" data-cat="info" onchange="generateNegativeList()">
+                        </h4>
+                        <p class="text-xs text-blue-700/80 mb-2">Evita estudantes buscando definições.</p>
+                        <div class="text-xs font-mono text-blue-800 bg-white p-2 rounded border border-blue-200">
+                            o que e, significado, historia, wikipedia, artigo, trabalho escolar, tcc
+                        </div>
+                    </div>
+
+                </div>
+
+                <!-- OUTPUT FOR NEGATIVES -->
+                <div class="pt-4 border-t border-slate-200">
+                    <div class="flex justify-between items-center mb-2">
+                        <span class="text-xs font-bold uppercase text-slate-700">Sua Lista Pronta de Negativas para Adicionar no Google Ads:</span>
+                        <button onclick="copyNegatives()" class="text-xs bg-slate-900 text-white font-bold px-3 py-1.5 rounded-lg hover:bg-slate-800 transition">
+                            <i class="fa-solid fa-copy mr-1"></i> Copiar Negativas
+                        </button>
+                    </div>
+                    <textarea id="negativesOutput" readonly rows="5" class="w-full p-3 font-mono text-xs bg-slate-900 text-rose-300 rounded-xl border border-slate-800"></textarea>
+                </div>
+            </div>
+        </div>
+
+    </main>
+
+    <!-- FOOTER -->
+    <footer class="bg-white border-t border-slate-200 py-4 mt-auto">
+        <div class="max-w-7xl mx-auto px-4 text-center text-xs text-slate-500">
+            Dashboard baseado estritamente nas diretrizes de correspondência de palavras-chave do Google Ads (Ampla, Frase, Exata e Negativa).
+        </div>
+    </footer>
+
+    <!-- SCRIPT LOGIC -->
+    <script>
+        // TAB SWITCHING
+        function switchTab(tabId) {
+            document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
+            document.getElementById('view-' + tabId).classList.remove('hidden');
+
+            // Update Desktop buttons
+            document.querySelectorAll('nav button').forEach(btn => {
+                btn.className = "px-4 py-2 text-xs font-semibold rounded-lg transition-all text-slate-600 hover:text-slate-900";
+            });
+            const activeNav = document.getElementById('tab-' + tabId);
+            if(activeNav) {
+                activeNav.className = "px-4 py-2 text-xs font-semibold rounded-lg transition-all text-blue-700 bg-white shadow-sm";
+            }
+
+            // Update Mobile buttons
+            document.querySelectorAll('.m-tab-btn').forEach(btn => {
+                if(btn.getAttribute('data-target') === tabId) {
+                    btn.className = "m-tab-btn flex-shrink-0 px-3 py-2 text-xs font-bold rounded-lg bg-blue-600 text-white";
+                } else {
+                    btn.className = "m-tab-btn flex-shrink-0 px-3 py-2 text-xs font-bold rounded-lg bg-white text-slate-700 border border-slate-200";
+                }
+            });
+        }
+
+        function setSample(val) {
+            document.getElementById('kwInput').value = val;
+            analyzeKeyword();
+        }
+
+        // MAIN ANALYZER LOGIC
+        function clearAndFocus() {
+            const input = document.getElementById('kwInput');
+            input.value = '';
+            input.focus();
+            analyzeKeyword();
+        }
+
+        function formatCurrentInput(type) {
+            let raw = document.getElementById('kwInput').value.trim();
+            if(!raw) raw = "ingles";
+            
+            // Clean syntax safely
+            let clean = raw.replace(/[\[\]"'\-]/g, '').trim();
+            
+            if(type === 'phrase') {
+                document.getElementById('kwInput').value = '"' + clean + '"';
+            } else if(type === 'exact') {
+                document.getElementById('kwInput').value = '[' + clean + ']';
+            } else {
+                document.getElementById('kwInput').value = clean;
+            }
+            analyzeKeyword();
+        }
+
+        function copySingle(elementId) {
+            const text = document.getElementById(elementId).innerText;
+            navigator.clipboard.writeText(text).then(() => {
+                alert('Copiado: ' + text);
+            }).catch(() => {
+                const el = document.createElement('textarea');
+                el.value = text;
+                document.body.appendChild(el);
+                el.select();
+                document.execCommand('copy');
+                document.body.removeChild(el);
+                alert('Copiado: ' + text);
+            });
+        }
+
+        function analyzeKeyword() {
+            let raw = document.getElementById('kwInput').value.trim();
+            if(!raw) {
+                raw = "ingles";
+            }
+
+            let type = "broad"; // Default
+            let cleanKw = raw;
+
+            if(raw.startsWith('-')) {
+                type = "negative";
+                cleanKw = raw.replace('-', '').trim();
+            } else if(raw.startsWith('[') && raw.endsWith(']')) {
+                type = "exact";
+                cleanKw = raw.substring(1, raw.length - 1).trim();
+            } else if(raw.startsWith('"') && raw.endsWith('"')) {
+                type = "phrase";
+                cleanKw = raw.substring(1, raw.length - 1).trim();
+            }
+
+            if(!cleanKw) cleanKw = "palavra";
+
+            // Update Target Label
+            document.getElementById('targetKwDisplay').innerText = cleanKw;
+
+            // Update Single Copy Badges
+            document.getElementById('copyBroadKw').innerText = cleanKw;
+            document.getElementById('copyPhraseKw').innerText = '"' + cleanKw + '"';
+            document.getElementById('copyExactKw').innerText = '[' + cleanKw + ']';
+
+            updateUIForType(type, cleanKw);
+        }
+
+        function updateUIForType(type, kw) {
+            const badgeIcon = document.getElementById('badgeIcon');
+            const badgeText = document.getElementById('typeBadgeText');
+            const tip = document.getElementById('formatTip');
+            
+            // Metrics elements
+            const convText = document.getElementById('mConversionText');
+            const convDesc = document.getElementById('mConversionDesc');
+            const convBadge = document.getElementById('mConversionBadge');
+
+            const riskText = document.getElementById('mRiskText');
+            const riskDesc = document.getElementById('mRiskDesc');
+            const riskBadge = document.getElementById('mRiskBadge');
+
+            const ctrlText = document.getElementById('mControlText');
+            const ctrlDesc = document.getElementById('mControlDesc');
+            const ctrlBadge = document.getElementById('mControlBadge');
+
+            const examplesContainer = document.getElementById('examplesContainer');
+
+            // Detect if word is too single/short (like "ingles")
+            const isSingleWord = !kw.includes(' ');
+
+            if(type === 'broad') {
+                badgeIcon.className = "w-12 h-12 rounded-xl bg-blue-600 text-white flex items-center justify-center font-bold text-2xl flex-shrink-0";
+                badgeIcon.innerHTML = '<i class="fa-solid fa-globe"></i>';
+                badgeText.innerText = 'Correspondência Ampla (Sem Sinais)';
+                tip.innerHTML = 'Você digitou <b>' + kw + '</b> sem aspas nem colchetes. O robô do Google vai disparar seu anúncio para qualquer busca que tenha relação genérica com "' + kw + '".';
+
+                if(isSingleWord) {
+                    convText.innerText = "Média / Baixa (Palavra Curta)";
+                    convDesc.innerText = 'Como "' + kw + '" é apenas uma palavra isolada, a intenção de quem pesquisa é vaga. A pessoa pode estar buscando tradutor, aulas, dicionário ou empregos.';
+                    convBadge.innerHTML = '<i class="fa-solid fa-triangle-exclamation text-amber-500 mr-1"></i> Atenção: Termo Muito Amplo';
+
+                    riskText.innerText = "Alto Risco de Gastar à Toa";
+                    riskDesc.innerText = 'Sem especificar o que você quer vender com "' + kw + '", o Google vai gastar seu dinheiro com buscas desqualificadas.';
+                    riskBadge.innerHTML = '<i class="fa-solid fa-triangle-exclamation text-rose-500 mr-1"></i> Recomendação: Adicionar termos (ex: curso de ' + kw + ')';
+                } else {
+                    convText.innerText = "Média de Conversão";
+                    convDesc.innerText = "Com a frase em ampla, atrai volume de buscas, mas aceita sinônimos que podem desviar do objetivo principal.";
+                    convBadge.innerHTML = '<i class="fa-solid fa-bullseye text-amber-500 mr-1"></i> Funil: Topo / Meio';
+
+                    riskText.innerText = "Risco Moderado a Alto";
+                    riskDesc.innerText = "Pode ativar buscas que você não previa. Exige acompanhar o relatório de termos de pesquisa.";
+                    riskBadge.innerHTML = '<i class="fa-solid fa-shield text-amber-500 mr-1"></i> Atenção: Usar Negativas';
+                }
+
+                ctrlText.innerText = "Baixo Controle";
+                ctrlDesc.innerText = 'O algoritmo decide autonomamente quais buscas se aproximam de "' + kw + '".';
+                ctrlBadge.innerHTML = '<i class="fa-solid fa-robot text-blue-500 mr-1"></i> Controle: Algoritmo Decide';
+
+                examplesContainer.innerHTML = 
+                    '<div class="p-3.5 bg-emerald-50 text-emerald-900 border border-emerald-200 rounded-xl text-xs flex items-center justify-between">' +
+                        '<div><span class="font-bold block text-sm mb-0.5">O Anúncio Aparece Para:</span> Buscas com a palavra ou sinônimos. Ex: "tradutor de ' + kw + '", "aprender ' + kw + '", "dicionario ' + kw + '", "aulas de ' + kw + '".</div>' +
+                        '<i class="fa-solid fa-circle-check text-emerald-600 text-xl"></i>' +
+                    '</div>' +
+                    '<div class="p-3.5 bg-rose-50 text-rose-900 border border-rose-200 rounded-xl text-xs flex items-center justify-between">' +
+                        '<div><span class="font-bold block text-sm mb-0.5">Risco de Gastar Dinheiro Com:</span> Buscas sem intenção de compra. Ex: "' + kw + ' gratis pdf", "vagas de professor de ' + kw + '", "' + kw + ' legendado online".</div>' +
+                        '<i class="fa-solid fa-triangle-exclamation text-rose-600 text-xl"></i>' +
+                    '</div>';
+
+            } else if(type === 'phrase') {
+                badgeIcon.className = "w-12 h-12 rounded-xl bg-purple-600 text-white flex items-center justify-center font-bold text-2xl flex-shrink-0";
+                badgeIcon.innerHTML = '<i class="fa-solid fa-quote-left"></i>';
+                badgeText.innerText = 'Correspondência de Frase ("' + kw + '")';
+                tip.innerHTML = 'Com aspas, o anúncio só aparece se a busca da pessoa contiver o termo <b>"' + kw + '"</b> no mesmo sentido, aceitando palavras antes ou depois.';
+
+                convText.innerText = "Alta Chance de Venda";
+                convDesc.innerText = 'Excelente equilíbrio! Garante que a essência de "' + kw + '" esteja presente, permitindo variações como "comprar ' + kw + '" ou "' + kw + ' em promoção".';
+                convBadge.innerHTML = '<i class="fa-solid fa-bullseye text-emerald-500 mr-1"></i> Formato Mais Recomendado!';
+
+                riskText.innerText = "Risco Baixo / Controlado";
+                riskDesc.innerText = 'Evita que o Google invente sinônimos que não tenham nada a ver com "' + kw + '".';
+                riskBadge.innerHTML = '<i class="fa-solid fa-shield-check text-emerald-500 mr-1"></i> Proteção: Boa';
+
+                ctrlText.innerText = "Bom Controle Seu";
+                ctrlDesc.innerText = 'Você trava o sentido principal de "' + kw + '" mas não perde o volume de pesquisas reais.';
+                ctrlBadge.innerHTML = '<i class="fa-solid fa-sliders text-purple-500 mr-1"></i> Controle: Equilibrado';
+
+                examplesContainer.innerHTML = 
+                    '<div class="p-3.5 bg-emerald-50 text-emerald-900 border border-emerald-200 rounded-xl text-xs flex items-center justify-between">' +
+                        '<div><span class="font-bold block text-sm mb-0.5">O Anúncio Aparece Para:</span> Frases com seu termo. Ex: "melhor ' + kw + ' online", "comprar ' + kw + ' agora", "onde encontrar ' + kw + ' em SP".</div>' +
+                        '<i class="fa-solid fa-circle-check text-emerald-600 text-xl"></i>' +
+                    '</div>' +
+                    '<div class="p-3.5 bg-slate-100 text-slate-800 border border-slate-200 rounded-xl text-xs flex items-center justify-between">' +
+                        '<div><span class="font-bold block text-sm mb-0.5">Bloqueia Automático:</span> Pesquisas que troquem o sentido de "' + kw + '" ou assuntos totalmente desconexos.</div>' +
+                        '<i class="fa-solid fa-shield-halved text-purple-600 text-xl"></i>' +
+                    '</div>';
+
+            } else if(type === 'exact') {
+                badgeIcon.className = "w-12 h-12 rounded-xl bg-emerald-600 text-white flex items-center justify-center font-bold text-2xl flex-shrink-0";
+                badgeIcon.innerHTML = '<i class="fa-solid fa-brackets-square"></i>';
+                badgeText.innerText = 'Correspondência Exata ([' + kw + '])';
+                tip.innerHTML = 'Entre colchetes, seu anúncio SÓ vai aparecer se a pessoa digitar exatamente <b>[' + kw + ']</b> ou variações exatas com o mesmo significado direto.';
+
+                convText.innerText = "Altíssimo Potencial!";
+                convDesc.innerText = "Ideal para não perder dinheiro! Foca exatamente no cliente que digitou essa palavra específica.";
+                convBadge.innerHTML = '<i class="fa-solid fa-bullseye text-emerald-500 mr-1"></i> Funil: Fundo (Pronto para Ação)';
+
+                riskText.innerText = "Mínimo Risco de Desperdício";
+                riskDesc.innerText = "Você não paga por nenhuma palavra extra que o usuário adicionar na busca.";
+                riskBadge.innerHTML = '<i class="fa-solid fa-circle-check text-emerald-500 mr-1"></i> Segurança: Máxima';
+
+                ctrlText.innerText = "Controle Absoluto";
+                ctrlDesc.innerText = "Você escolhe exatamente em qual palavra vai investir seu dinheiro.";
+                ctrlBadge.innerHTML = '<i class="fa-solid fa-lock text-emerald-500 mr-1"></i> Controle: Total';
+
+                examplesContainer.innerHTML = 
+                    '<div class="p-3.5 bg-emerald-50 text-emerald-900 border border-emerald-200 rounded-xl text-xs flex items-center justify-between">' +
+                        '<div><span class="font-bold block text-sm mb-0.5">Aparece Apenas Para:</span> Digitações idênticas. Ex: "' + kw + '" ou variações de plural e acentos.</div>' +
+                        '<i class="fa-solid fa-circle-check text-emerald-600 text-xl"></i>' +
+                    '</div>' +
+                    '<div class="p-3.5 bg-slate-100 text-slate-800 border border-slate-200 rounded-xl text-xs flex items-center justify-between">' +
+                        '<div><span class="font-bold block text-sm mb-0.5">Não Aparece Se:</span> O usuário adicionar palavras extras como "comprar ' + kw + '" ou "' + kw + ' gratis".</div>' +
+                        '<i class="fa-solid fa-filter text-emerald-600 text-xl"></i>' +
+                    '</div>';
+
+            } else if(type === 'negative') {
+                badgeIcon.className = "w-12 h-12 rounded-xl bg-rose-600 text-white flex items-center justify-center font-bold text-2xl flex-shrink-0";
+                badgeIcon.innerHTML = '<i class="fa-solid fa-ban"></i>';
+                badgeText.innerText = 'Palavra Negativa (-' + kw + ')';
+                tip.innerHTML = 'Você colocou o sinal de menos. Isso impede o Google de mostrar qualquer anúncio se o usuário digitar <b>"' + kw + '"</b>.';
+
+                convText.innerText = "Proteção de Verba";
+                convDesc.innerText = "Bloqueia tráfego ruim e economiza seu orçamento.";
+                convBadge.innerHTML = '<i class="fa-solid fa-shield text-blue-500 mr-1"></i> Proteção Ativa';
+
+                riskText.innerText = "Zero Risco";
+                riskDesc.innerText = "Corta cliques de curioso antes que aconteçam.";
+                riskBadge.innerHTML = '<i class="fa-solid fa-circle-check text-emerald-500 mr-1"></i> Economia Direta';
+
+                ctrlText.innerText = "Filtro Máximo";
+                ctrlDesc.innerText = "Blindagem da campanha.";
+                ctrlBadge.innerHTML = '<i class="fa-solid fa-filter text-rose-500 mr-1"></i> Filtro de Lixo';
+
+                examplesContainer.innerHTML = 
+                    '<div class="p-3.5 bg-rose-50 text-rose-900 border border-rose-200 rounded-xl text-xs flex items-center justify-between">' +
+                        '<div><span class="font-bold block text-sm mb-0.5">Resultado Prático:</span> Se o usuário pesquisar qualquer coisa que contenha "' + kw + '", seu anúncio NUNCA vai aparecer.</div>' +
+                        '<i class="fa-solid fa-shield-xmark text-rose-600 text-xl"></i>' +
+                    '</div>';
+            }
+        }
+
+        // TAB 2: SIMULATOR
+        function runSimulation() {
+            const base = document.getElementById('simBaseKw').value.trim() || "tênis esportivo";
+            document.getElementById('simTitleBroad').innerText = base;
+            document.getElementById('simTitlePhrase').innerText = '"' + base + '"';
+            document.getElementById('simTitleExact').innerText = '[' + base + ']';
+        }
+
+        // TAB 3: BULK FORMATTER
+        function formatBulk(type) {
+            const input = document.getElementById('bulkInput').value;
+            const lines = input.split('\n').filter(l => l.trim().length > 0);
+            
+            let formatted = lines.map(line => {
+                let clean = line.replace(/[\[\]"'\-]/g, '').trim();
+                if(type === 'phrase') return '"' + clean + '"';
+                if(type === 'exact') return '[' + clean + ']';
+                return clean; // broad
+            });
+
+            document.getElementById('bulkOutput').value = formatted.join('\n');
+        }
+
+        function copyFormattedList() {
+            const out = document.getElementById('bulkOutput');
+            out.select();
+            document.execCommand('copy');
+            alert('Lista copiada para a área de transferência! Cole diretamente no Google Ads.');
+        }
+
+        // TAB 4: NEGATIVES GENERATOR
+        function generateNegativeList() {
+            const checks = document.querySelectorAll('.neg-check');
+            let list = [];
+
+            checks.forEach(c => {
+                if(c.checked) {
+                    const cat = c.getAttribute('data-cat');
+                    if(cat === 'free') {
+                        list.push('gratis', 'gratuito', 'de graca', '0800', 'pirata', 'pdf', 'download', 'torrent', 'baixar');
+                    }
+                    if(cat === 'jobs') {
+                        list.push('trabalhar', 'vagas', 'curriculo', 'estagio', 'salario', 'contratacao', 'professor', 'emprego', 'requisitos');
+                    }
+                    if(cat === 'info') {
+                        list.push('o que e', 'significado', 'historia', 'wikipedia', 'artigo', 'trabalho escolar', 'tcc', 'slides', 'resumo');
+                    }
+                }
+            });
+
+            document.getElementById('negativesOutput').value = list.join('\n');
+        }
+
+        function copyNegatives() {
+            const out = document.getElementById('negativesOutput');
+            out.select();
+            document.execCommand('copy');
+            alert('Lista de palavras negativas copiada!');
+        }
+
+        // INIT
+        window.onload = function() {
+            analyzeKeyword();
+            generateNegativeList();
+        }
+    </script>
+</body>
+</html>
